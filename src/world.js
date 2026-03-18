@@ -429,22 +429,22 @@ export class ShipWorld {
       color: 0x887766, roughness: 0.75, metalness: 0.4,
     });
 
-    // Create pivot group at hinge edge position
+    // Create pivot group at hinge edge of the doorway
     const pivot = new THREE.Group();
-    pivot.position.set(x, 0, z);
+    const doorW = 1.8;
 
     // Door mesh offset so hinge edge is at pivot origin
-    const doorW = 1.8;
     const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(doorW, 2.4, 0.08), doorMat);
     doorMesh.position.y = 1.2; // center vertically
+    doorMesh.position.x = doorW / 2; // offset so left edge aligns with pivot
 
     if (wallAxis === 'z') {
+      // Wall runs along Z, door faces X. Pivot at left edge of opening.
+      pivot.position.set(x, 0, z - doorW / 2);
       pivot.rotation.y = Math.PI / 2;
-      // Offset door along its local X so left edge is at pivot
-      doorMesh.position.x = doorW / 2;
     } else {
-      // wallAxis === 'x'
-      doorMesh.position.x = doorW / 2;
+      // Wall runs along X, door faces Z. Pivot at left edge of opening.
+      pivot.position.set(x - doorW / 2, 0, z);
     }
 
     pivot.add(doorMesh);
