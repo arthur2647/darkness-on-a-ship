@@ -561,7 +561,7 @@ function animate() {
       new THREE.Vector3(playerRadius * 2, 1.6, playerRadius * 2)
     );
     let blocked = false;
-    for (const collider of world.colliders) {
+    for (const collider of world.getColliders()) {
       if (playerBox.intersectsBox(collider)) {
         blocked = true;
         break;
