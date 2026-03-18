@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Темница — Darkness on the Ship</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="blocker">
+    <div id="title-screen">
+      <h1>ТЕМНИЦА</h1>
+      <h2>Darkness on the Ship</h2>
+      <p class="subtitle">You wake in the dark. The ship groans around you.<br>Find your way out... if you can.</p>
+      <div id="start-btn">CLICK TO BEGIN</div>
+      <div class="controls-hint">
+        <span>WASD — Move</span>
+        <span>MOUSE — Look</span>
+        <span>F — Flashlight</span>
+        <span>E — Interact</span>
+        <span>ESC — Pause</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="hud" style="display:none;">
+    <div id="battery-container">
+      <div id="battery-label">BATTERY</div>
+      <div id="battery-bar"><div id="battery-fill"></div></div>
+    </div>
+    <div id="depth-indicator">DECK 1</div>
+    <div id="interaction-prompt" style="display:none;"></div>
+    <div id="note-overlay" style="display:none;">
+      <div id="note-content"></div>
+      <div id="note-close">Press E to close</div>
+    </div>
+    <div id="crosshair">+</div>
+  </div>
+
+  <div id="jump-scare-overlay" style="display:none;"></div>
+  <div id="death-screen" style="display:none;">
+    <h1>ВЫ ПОГИБЛИ</h1>
+    <h2>You have perished</h2>
+    <p>The darkness consumed you.</p>
+    <div id="restart-btn">TRY AGAIN</div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

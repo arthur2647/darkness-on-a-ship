@@ -1,0 +1,247 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  cursor: none;
+}
+
+canvas {
+  display: block;
+}
+
+#blocker {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  cursor: default;
+}
+
+#title-screen {
+  text-align: center;
+}
+
+#title-screen h1 {
+  font-size: 5rem;
+  color: #c62828;
+  text-shadow: 0 0 40px rgba(198, 40, 40, 0.6);
+  letter-spacing: 0.3em;
+  margin-bottom: 0.2em;
+  animation: flicker 4s infinite;
+}
+
+#title-screen h2 {
+  font-size: 1.5rem;
+  color: #888;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  margin-bottom: 2em;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  margin-bottom: 3em;
+}
+
+#start-btn, #restart-btn {
+  display: inline-block;
+  padding: 15px 60px;
+  border: 1px solid #c62828;
+  color: #c62828;
+  font-family: 'Courier New', monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.3em;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#start-btn:hover, #restart-btn:hover {
+  background: #c62828;
+  color: #000;
+}
+
+.controls-hint {
+  margin-top: 3em;
+  display: flex;
+  gap: 2em;
+  justify-content: center;
+  color: #444;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+@keyframes flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.4; }
+  97% { opacity: 0.9; }
+  98% { opacity: 0.3; }
+}
+
+/* HUD */
+#hud {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 24px;
+  font-weight: 100;
+}
+
+#battery-container {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+}
+
+#battery-label {
+  font-size: 0.6rem;
+  color: #666;
+  letter-spacing: 0.2em;
+  margin-bottom: 4px;
+}
+
+#battery-bar {
+  width: 120px;
+  height: 6px;
+  background: #222;
+  border: 1px solid #444;
+}
+
+#battery-fill {
+  width: 100%;
+  height: 100%;
+  background: #4caf50;
+  transition: width 0.5s, background 0.5s;
+}
+
+#depth-indicator {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  font-size: 0.7rem;
+  color: #555;
+  letter-spacing: 0.3em;
+}
+
+#interaction-prompt {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #aaa;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 20px;
+  border: 1px solid #333;
+}
+
+#note-overlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  max-height: 400px;
+  background: #1a1a0f;
+  border: 1px solid #333;
+  padding: 40px;
+  color: #c8b88a;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  pointer-events: auto;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+}
+
+#note-close {
+  margin-top: 20px;
+  color: #555;
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+/* Jump scare */
+#jump-scare-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#jump-scare-overlay.active {
+  animation: scarePulse 0.5s ease-out;
+}
+
+@keyframes scarePulse {
+  0% { background: #fff; }
+  10% { background: #c62828; }
+  100% { background: #000; }
+}
+
+/* Death screen */
+#death-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+#death-screen h1 {
+  font-size: 4rem;
+  color: #c62828;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.3em;
+}
+
+#death-screen h2 {
+  font-size: 1.2rem;
+  color: #666;
+  letter-spacing: 0.4em;
+  margin-bottom: 2em;
+}
+
+#death-screen p {
+  color: #444;
+  margin-bottom: 3em;
+}
+
+/* Vignette effect */
+#hud::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+  pointer-events: none;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "darkness-on-a-ship",
+  "version": "0.1.0",
+  "description": "A first-person horror game set on an abandoned Soviet ship",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite preview --port $PORT --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
