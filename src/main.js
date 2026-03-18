@@ -292,13 +292,14 @@ function handleInteraction() {
     if (!door.userData.isOpen) {
       door.userData.isOpen = true;
       door.userData.locked = false;
-      const targetRot = door.rotation.y + door.userData.openRotation;
-      const startRot = door.rotation.y;
+      const pivot = door.userData.pivot;
+      const targetRot = pivot.rotation.y + door.userData.openRotation;
+      const startRot = pivot.rotation.y;
       const startTime = performance.now();
       const animateDoor = (now) => {
         const t = Math.min((now - startTime) / 800, 1);
         const ease = 1 - Math.pow(1 - t, 3);
-        door.rotation.y = startRot + (targetRot - startRot) * ease;
+        pivot.rotation.y = startRot + (targetRot - startRot) * ease;
         if (t < 1) requestAnimationFrame(animateDoor);
       };
       requestAnimationFrame(animateDoor);

@@ -428,17 +428,34 @@ export class ShipWorld {
     const doorMat = new THREE.MeshStandardMaterial({
       color: 0x887766, roughness: 0.75, metalness: 0.4,
     });
-    const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.4, 0.08), doorMat);
-    doorMesh.position.set(x, 1.2, z);
+
+    // Create pivot group at hinge edge position
+    const pivot = new THREE.Group();
+    pivot.position.set(x, 0, z);
+
+    // Door mesh offset so hinge edge is at pivot origin
+    const doorW = 1.8;
+    const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(doorW, 2.4, 0.08), doorMat);
+    doorMesh.position.y = 1.2; // center vertically
+
     if (wallAxis === 'z') {
-      doorMesh.rotation.y = Math.PI / 2;
+      pivot.rotation.y = Math.PI / 2;
+      // Offset door along its local X so left edge is at pivot
+      doorMesh.position.x = doorW / 2;
+    } else {
+      // wallAxis === 'x'
+      doorMesh.position.x = doorW / 2;
     }
+
+    pivot.add(doorMesh);
+    group.add(pivot);
+
     doorMesh.userData.isDoor = true;
     doorMesh.userData.isOpen = false;
     doorMesh.userData.locked = locked || false;
     doorMesh.userData.openRotation = Math.PI / 2;
     doorMesh.userData.deckIndex = deckIndex;
-    group.add(doorMesh);
+    doorMesh.userData.pivot = pivot;
     this.doors.push(doorMesh);
 
     if (sign) {
@@ -447,8 +464,13 @@ export class ShipWorld {
         new THREE.PlaneGeometry(1.0, 0.3),
         new THREE.MeshStandardMaterial({ map: signTex, emissive: 0x220000, emissiveIntensity: 0.3 })
       );
-      signMesh.position.set(x, 2.7, z);
-      if (wallAxis === 'z') signMesh.rotation.y = Math.PI / 2;
+      // Offset sign slightly from wall to prevent z-fighting
+      if (wallAxis === 'z') {
+        signMesh.position.set(x + 0.05, 2.7, z);
+        signMesh.rotation.y = Math.PI / 2;
+      } else {
+        signMesh.position.set(x, 2.7, z + 0.05);
+      }
       group.add(signMesh);
     }
   }
