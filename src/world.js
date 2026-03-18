@@ -390,7 +390,6 @@ export class ShipWorld {
       // Add pipes along first corridor of each deck
       const firstSpace = deck.spaces[0];
       const pipeY = deck.h - 0.15;
-      const pipeZ = (firstSpace.z1 + firstSpace.z2) / 2;
       const pipeLen = Math.abs(firstSpace.z1 - firstSpace.z2);
       addPipes(group, (firstSpace.x1 + firstSpace.x2) / 2, pipeY, firstSpace.z1, pipeLen, 'z');
 
@@ -477,6 +476,7 @@ export class ShipWorld {
   placeNote(group, note, deckIndex) {
     const noteMat = new THREE.MeshStandardMaterial({
       color: 0xc8b88a, emissive: 0x221100, emissiveIntensity: 0.1, roughness: 1,
+      side: THREE.DoubleSide,
     });
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.4), noteMat);
     mesh.position.set(...note.pos);

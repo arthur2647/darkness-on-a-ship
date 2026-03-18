@@ -21,7 +21,6 @@ const state = {
   won: false,
   footstepTimer: 0,
   footstepInterval: 0.45,
-  velocity: new THREE.Vector3(),
   direction: new THREE.Vector3(),
   euler: new THREE.Euler(0, 0, 0, 'YXZ'),
   keys: {},
@@ -352,12 +351,16 @@ function handleInteraction() {
   }
 }
 
+let promptTimeout = null;
 function showPrompt(text, duration) {
+  if (promptTimeout) clearTimeout(promptTimeout);
+  promptTimeout = null;
   interactionPrompt.textContent = text;
   interactionPrompt.style.display = 'block';
   if (duration) {
-    setTimeout(() => {
+    promptTimeout = setTimeout(() => {
       interactionPrompt.style.display = 'none';
+      promptTimeout = null;
     }, duration);
   }
 }
@@ -394,7 +397,8 @@ function checkScares() {
 
   scares.forEach(scare => {
     if (scare.triggered) return;
-    const dist = playerPos.distanceTo(new THREE.Vector3(...scare.pos));
+    if (!scare._pos) scare._pos = new THREE.Vector3(...scare.pos);
+    const dist = playerPos.distanceTo(scare._pos);
     if (dist < 3) {
       scare.triggered = true;
       triggerScare(scare.type);
@@ -557,25 +561,32 @@ function animate() {
   if (state.direction.length() > 0) {
     state.direction.normalize();
     const move = state.direction.clone().multiplyScalar(state.moveSpeed * delta);
-    const newPos = camera.position.clone().add(move);
-    newPos.y = 1.6;
-
-    // Wall collision check
+    const colliders = world.getColliders();
     const playerRadius = 0.3;
-    const playerBox = new THREE.Box3().setFromCenterAndSize(
-      newPos,
-      new THREE.Vector3(playerRadius * 2, 1.6, playerRadius * 2)
-    );
-    let blocked = false;
-    for (const collider of world.getColliders()) {
-      if (playerBox.intersectsBox(collider)) {
-        blocked = true;
-        break;
-      }
+    const playerSize = new THREE.Vector3(playerRadius * 2, 1.6, playerRadius * 2);
+
+    // Try X axis
+    const testX = camera.position.clone();
+    testX.x += move.x;
+    testX.y = 1.6;
+    let blockedX = false;
+    const boxX = new THREE.Box3().setFromCenterAndSize(testX, playerSize);
+    for (const c of colliders) {
+      if (boxX.intersectsBox(c)) { blockedX = true; break; }
     }
-    if (!blocked) {
-      camera.position.copy(newPos);
+
+    // Try Z axis
+    const testZ = camera.position.clone();
+    testZ.z += move.z;
+    testZ.y = 1.6;
+    let blockedZ = false;
+    const boxZ = new THREE.Box3().setFromCenterAndSize(testZ, playerSize);
+    for (const c of colliders) {
+      if (boxZ.intersectsBox(c)) { blockedZ = true; break; }
     }
+
+    if (!blockedX) camera.position.x = testX.x;
+    if (!blockedZ) camera.position.z = testZ.z;
 
     state.footstepTimer += delta;
     if (state.footstepTimer >= state.footstepInterval) {
@@ -618,14 +629,12 @@ function animate() {
   state.scareCooldown = Math.max(0, state.scareCooldown - delta);
   checkScares();
 
-  // Animate items
+  // Animate small pickup items (not exit hatch)
   const time = clock.elapsedTime;
   world.interactables.forEach(item => {
-    if (item.userData.isItem && item.visible) {
-      item.position.y = item.userData.originalY
-        ? item.userData.originalY + Math.sin(time * 2) * 0.05
-        : item.position.y;
+    if (item.userData.isItem && item.visible && item.userData.itemType !== 'exit') {
       if (!item.userData.originalY) item.userData.originalY = item.position.y;
+      item.position.y = item.userData.originalY + Math.sin(time * 2) * 0.05;
       item.rotation.y += delta * 0.5;
     }
   });
