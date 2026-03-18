@@ -511,25 +511,89 @@ export class ShipWorld {
   }
 
   placeStairs(group, stairs, deckIndex) {
-    const marker = new THREE.Mesh(
-      new THREE.BoxGeometry(2, 0.05, 2),
-      new THREE.MeshStandardMaterial({ color: 0x882200, emissive: 0x661100, emissiveIntensity: 0.4 })
-    );
-    marker.position.set(stairs.pos[0], stairs.pos[1], stairs.pos[2]);
-    group.add(marker);
+    const sx = stairs.pos[0], sy = stairs.pos[1], sz = stairs.pos[2];
+    const hatchGroup = new THREE.Group();
+    hatchGroup.position.set(sx, sy, sz);
 
+    const metalMat = new THREE.MeshStandardMaterial({
+      color: 0x5a5a52, roughness: 0.7, metalness: 0.6,
+    });
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x444440, roughness: 0.8, metalness: 0.5,
+    });
+
+    // Outer frame (raised rim)
+    const frameThick = 0.12;
+    const frameH = 0.15;
+    const frameOuter = 2.2;
+    const frameInner = 2.0;
+    const frameParts = [
+      { w: frameOuter, d: frameThick, px: 0, pz: frameInner / 2 },
+      { w: frameOuter, d: frameThick, px: 0, pz: -frameInner / 2 },
+      { w: frameThick, d: frameInner, px: frameInner / 2, pz: 0 },
+      { w: frameThick, d: frameInner, px: -frameInner / 2, pz: 0 },
+    ];
+    frameParts.forEach(fp => {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(fp.w, frameH, fp.d), frameMat);
+      bar.position.set(fp.px, frameH / 2, fp.pz);
+      hatchGroup.add(bar);
+    });
+
+    // Hatch lid (sits inside frame)
+    const lid = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.9), metalMat);
+    lid.position.y = 0.04;
+    hatchGroup.add(lid);
+
+    // Cross braces on the lid
+    const braceMat = new THREE.MeshStandardMaterial({
+      color: 0x6a6a5a, roughness: 0.6, metalness: 0.7,
+    });
+    const brace1 = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.04, 0.08), braceMat);
+    brace1.position.y = 0.1;
+    hatchGroup.add(brace1);
+    const brace2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 1.7), braceMat);
+    brace2.position.y = 0.1;
+    hatchGroup.add(brace2);
+
+    // Handle/wheel (torus on top)
+    const handleMat = new THREE.MeshStandardMaterial({
+      color: 0x993322, roughness: 0.5, metalness: 0.7,
+      emissive: 0x331100, emissiveIntensity: 0.3,
+    });
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.04, 8, 16), handleMat);
+    handle.rotation.x = -Math.PI / 2;
+    handle.position.y = 0.18;
+    hatchGroup.add(handle);
+
+    // Handle hub
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.1, 8), handleMat);
+    hub.position.y = 0.15;
+    hatchGroup.add(hub);
+
+    // Corner bolts
+    const boltMat = new THREE.MeshStandardMaterial({ color: 0x777770, metalness: 0.8, roughness: 0.4 });
+    [[-0.8, -0.8], [-0.8, 0.8], [0.8, -0.8], [0.8, 0.8]].forEach(([bx, bz]) => {
+      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.12, 6), boltMat);
+      bolt.position.set(bx, 0.1, bz);
+      hatchGroup.add(bolt);
+    });
+
+    group.add(hatchGroup);
+
+    // Sign above
     const signTex = createCyrillicSign('ВНИЗ ↓', 150, 40);
     const sign = new THREE.Mesh(
       new THREE.PlaneGeometry(0.8, 0.2),
       new THREE.MeshStandardMaterial({ map: signTex, emissive: 0x330000, emissiveIntensity: 0.5 })
     );
-    sign.position.set(stairs.pos[0], stairs.pos[1] + 2.5, stairs.pos[2] + 1);
+    sign.position.set(sx, sy + 2.5, sz + 1);
     group.add(sign);
 
-    marker.userData.isStairs = true;
-    marker.userData.toLevel = stairs.toLevel;
-    marker.userData.deckIndex = deckIndex;
-    this.interactables.push(marker);
+    // Use the lid as the interactable target
+    lid.userData.isStairs = true;
+    lid.userData.toLevel = stairs.toLevel;
+    lid.userData.deckIndex = deckIndex;
+    this.interactables.push(lid);
   }
 
   showDeck(index) {
