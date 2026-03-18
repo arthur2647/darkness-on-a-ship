@@ -429,22 +429,20 @@ export class ShipWorld {
       color: 0x887766, roughness: 0.75, metalness: 0.4,
     });
 
-    // Create pivot group at hinge edge of the doorway
-    const pivot = new THREE.Group();
     const doorW = 1.8;
-
-    // Door mesh offset so hinge edge is at pivot origin
-    const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(doorW, 2.4, 0.08), doorMat);
-    doorMesh.position.y = 1.2; // center vertically
-    doorMesh.position.x = doorW / 2; // offset so left edge aligns with pivot
+    const pivot = new THREE.Group();
+    let doorMesh;
 
     if (wallAxis === 'z') {
-      // Wall runs along Z, door faces X. Pivot at left edge of opening.
+      // Wall runs along Z at fixed x. Door is thin in X, wide in Z.
+      doorMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.4, doorW), doorMat);
       pivot.position.set(x, 0, z - doorW / 2);
-      pivot.rotation.y = Math.PI / 2;
+      doorMesh.position.set(0, 1.2, doorW / 2);
     } else {
-      // Wall runs along X, door faces Z. Pivot at left edge of opening.
+      // Wall runs along X at fixed z. Door is wide in X, thin in Z.
+      doorMesh = new THREE.Mesh(new THREE.BoxGeometry(doorW, 2.4, 0.08), doorMat);
       pivot.position.set(x - doorW / 2, 0, z);
+      doorMesh.position.set(doorW / 2, 1.2, 0);
     }
 
     pivot.add(doorMesh);
@@ -453,9 +451,10 @@ export class ShipWorld {
     doorMesh.userData.isDoor = true;
     doorMesh.userData.isOpen = false;
     doorMesh.userData.locked = locked || false;
-    doorMesh.userData.openRotation = Math.PI / 2;
     doorMesh.userData.deckIndex = deckIndex;
     doorMesh.userData.pivot = pivot;
+    doorMesh.userData.closedRotation = 0;
+    doorMesh.userData.openedRotation = Math.PI / 2;
     this.doors.push(doorMesh);
 
     if (sign) {

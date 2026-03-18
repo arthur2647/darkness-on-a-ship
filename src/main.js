@@ -289,22 +289,27 @@ function handleInteraction() {
       showPrompt('Locked — need key (КЛЮЧ)', 2000);
       return;
     }
-    if (!door.userData.isOpen) {
-      door.userData.isOpen = true;
-      door.userData.locked = false;
-      const pivot = door.userData.pivot;
-      const targetRot = pivot.rotation.y + door.userData.openRotation;
-      const startRot = pivot.rotation.y;
-      const startTime = performance.now();
-      const animateDoor = (now) => {
-        const t = Math.min((now - startTime) / 800, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        pivot.rotation.y = startRot + (targetRot - startRot) * ease;
-        if (t < 1) requestAnimationFrame(animateDoor);
-      };
-      requestAnimationFrame(animateDoor);
-      audio.playDoorOpen();
-    }
+    if (door.userData.animating) return;
+    door.userData.locked = false;
+    const opening = !door.userData.isOpen;
+    door.userData.isOpen = opening;
+    door.userData.animating = true;
+    const pivot = door.userData.pivot;
+    const startRot = pivot.rotation.y;
+    const targetRot = opening ? door.userData.openedRotation : door.userData.closedRotation;
+    const startTime = performance.now();
+    const animateDoor = (now) => {
+      const t = Math.min((now - startTime) / 800, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      pivot.rotation.y = startRot + (targetRot - startRot) * ease;
+      if (t < 1) {
+        requestAnimationFrame(animateDoor);
+      } else {
+        door.userData.animating = false;
+      }
+    };
+    requestAnimationFrame(animateDoor);
+    audio.playDoorOpen();
     return;
   }
 
@@ -490,7 +495,7 @@ function updateProximityPrompts() {
     const prefix = isMobile ? '[TAP E]' : '[E]';
     if (obj.userData.isDoor) {
       if (obj.userData.isOpen) {
-        interactionPrompt.style.display = 'none';
+        showPrompt(`${prefix} Close Door — ЗАКРЫТЬ`);
       } else if (obj.userData.locked && !state.hasKey) {
         showPrompt(`${prefix} Locked — ЗАПЕРТО`);
       } else {
