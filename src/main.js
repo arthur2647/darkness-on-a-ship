@@ -381,6 +381,7 @@ function descendDeck(toLevel) {
 
     scene.fog.density = 0.06 + toLevel * 0.02;
     renderer.toneMappingExposure = 1.2 - toLevel * 0.15;
+    audio.setDeckDepth(toLevel);
 
     setTimeout(() => {
       jumpScareOverlay.style.display = 'none';

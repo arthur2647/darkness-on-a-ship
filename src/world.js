@@ -188,6 +188,210 @@ function addPipes(group, x, y, z, length, dir) {
   }
 }
 
+// ==================== ROOM FURNISHINGS ====================
+
+function addFurnishings(group, deckIndex) {
+  const woodMat = new THREE.MeshStandardMaterial({ color: 0x4a3528, roughness: 0.9, metalness: 0.05 });
+  const metalMat = new THREE.MeshStandardMaterial({ color: 0x555550, roughness: 0.7, metalness: 0.5 });
+  const fabricMat = new THREE.MeshStandardMaterial({ color: 0x3a3530, roughness: 1.0, metalness: 0 });
+  const paperMat = new THREE.MeshStandardMaterial({ color: 0x9a8a6a, roughness: 1.0, metalness: 0, side: THREE.DoubleSide });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x334444, roughness: 0.2, metalness: 0.1, transparent: true, opacity: 0.3 });
+
+  function addBox(w, h, d, x, y, z, mat, ry = 0) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.position.set(x, y, z);
+    if (ry) m.rotation.y = ry;
+    group.add(m);
+    return m;
+  }
+
+  function addCylinder(r, h, x, y, z, mat, segs = 8) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, segs), mat);
+    m.position.set(x, y, z);
+    group.add(m);
+    return m;
+  }
+
+  if (deckIndex === 0) {
+    // === КАЮТА 1 (x[-6,-2] z[-4,-8]) — Navigator's cabin ===
+    // Bunk bed frame
+    addBox(1.8, 0.08, 0.8, -4, 0.5, -4.8, woodMat);       // lower bunk surface
+    addBox(0.08, 1.6, 0.8, -4.9, 0.8, -4.8, woodMat);      // headboard
+    addBox(1.8, 0.08, 0.8, -4, 1.5, -4.8, woodMat);         // upper bunk
+    addBox(0.08, 1.6, 0.08, -3.1, 0.8, -4.4, metalMat);     // bed post
+    addBox(0.08, 1.6, 0.08, -3.1, 0.8, -5.2, metalMat);     // bed post
+    // Thin mattress on lower bunk
+    addBox(1.6, 0.06, 0.7, -4, 0.56, -4.8, fabricMat);
+    // Blanket draped on upper bunk (slightly tilted)
+    const blanket = addBox(1.0, 0.03, 0.5, -4.2, 1.54, -4.7, fabricMat);
+    blanket.rotation.z = 0.1;
+    // Small desk against wall
+    addBox(1.2, 0.05, 0.6, -4.5, 0.75, -7.3, woodMat);     // desk top
+    addBox(0.05, 0.75, 0.6, -5.05, 0.375, -7.3, woodMat);   // left leg
+    addBox(0.05, 0.75, 0.6, -3.95, 0.375, -7.3, woodMat);   // right leg
+    // Book on desk
+    addBox(0.2, 0.04, 0.15, -4.7, 0.79, -7.3, new THREE.MeshStandardMaterial({ color: 0x6b2020, roughness: 0.9 }));
+    // Pencil
+    addBox(0.02, 0.02, 0.18, -4.3, 0.79, -7.2, new THREE.MeshStandardMaterial({ color: 0x8a7a30, roughness: 0.8 }));
+    // Stool
+    addBox(0.35, 0.04, 0.35, -4.5, 0.45, -6.6, woodMat);
+    addCylinder(0.03, 0.45, -4.65, 0.225, -6.75, metalMat);
+    addCylinder(0.03, 0.45, -4.35, 0.225, -6.75, metalMat);
+    addCylinder(0.03, 0.45, -4.65, 0.225, -6.45, metalMat);
+    addCylinder(0.03, 0.45, -4.35, 0.225, -6.45, metalMat);
+    // Bottle on floor (fallen)
+    const bottle = addCylinder(0.04, 0.25, -3.2, 0.04, -5.8, glassMat);
+    bottle.rotation.z = Math.PI / 2;
+    bottle.rotation.y = 0.7;
+
+    // === КАЮТА 2 (x[2,7] z[-7,-12]) — Engineer's cabin ===
+    // Metal cot
+    addBox(1.6, 0.06, 0.7, 5.5, 0.4, -8, metalMat);        // bed frame
+    addBox(0.05, 0.4, 0.7, 4.7, 0.2, -8, metalMat);         // left leg
+    addBox(0.05, 0.4, 0.7, 6.3, 0.2, -8, metalMat);         // right leg
+    addBox(1.5, 0.05, 0.6, 5.5, 0.45, -8, fabricMat);       // mattress
+    // Pillow
+    addBox(0.3, 0.08, 0.25, 4.9, 0.51, -8, new THREE.MeshStandardMaterial({ color: 0x4a4540, roughness: 1.0 }));
+    // Workbench
+    addBox(1.5, 0.06, 0.8, 4.5, 0.8, -11.3, woodMat);
+    addBox(0.06, 0.8, 0.8, 3.8, 0.4, -11.3, woodMat);
+    addBox(0.06, 0.8, 0.8, 5.2, 0.4, -11.3, woodMat);
+    // Tools on bench
+    addBox(0.03, 0.03, 0.3, 4.2, 0.86, -11.2, metalMat);   // wrench
+    addBox(0.15, 0.12, 0.1, 4.8, 0.88, -11.3, metalMat);    // toolbox
+    // Scattered papers on floor
+    addBox(0.25, 0.005, 0.35, 3.5, 0.01, -9.5, paperMat, 0.4);
+    addBox(0.2, 0.005, 0.28, 3.8, 0.01, -10.1, paperMat, -0.7);
+    // Locker (tall, narrow)
+    addBox(0.5, 1.8, 0.5, 6.5, 0.9, -11, metalMat);
+    // Boots on floor
+    addBox(0.12, 0.2, 0.25, 6.0, 0.1, -8.5, new THREE.MeshStandardMaterial({ color: 0x2a2018, roughness: 0.95 }));
+    addBox(0.12, 0.2, 0.25, 6.2, 0.1, -8.6, new THREE.MeshStandardMaterial({ color: 0x2a2018, roughness: 0.95 }));
+
+    // === СКЛАД (x[-6,-2] z[-12,-17]) — Storage room ===
+    // Crates
+    addBox(0.8, 0.8, 0.8, -4.5, 0.4, -13.5, woodMat);
+    addBox(0.7, 0.7, 0.7, -3.5, 0.35, -13.8, woodMat);
+    addBox(0.6, 0.6, 0.6, -4.2, 1.1, -13.6, woodMat);       // stacked
+    // Barrel
+    addCylinder(0.35, 0.9, -5, 0.45, -15.5, new THREE.MeshStandardMaterial({ color: 0x5a4030, roughness: 0.85, metalness: 0.15 }));
+    // Shelf on wall
+    addBox(2.0, 0.05, 0.35, -4, 1.5, -16.5, woodMat);
+    // Small boxes on shelf
+    addBox(0.3, 0.2, 0.25, -4.5, 1.65, -16.5, new THREE.MeshStandardMaterial({ color: 0x3a5a3a, roughness: 0.9 }));
+    addBox(0.25, 0.18, 0.2, -3.7, 1.63, -16.5, new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.9 }));
+    // Rope coil on floor
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 1.0 });
+    const rope = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.04, 6, 12), ropeMat);
+    rope.rotation.x = -Math.PI / 2;
+    rope.position.set(-3, 0.05, -15);
+    group.add(rope);
+
+  } else if (deckIndex === 1) {
+    // === ГЕНЕРАТОР (x[1.5,7.5] z[-4,-10]) — Generator room ===
+    // Large generator (boxy machine)
+    const genMat = new THREE.MeshStandardMaterial({ color: 0x3a4a3a, roughness: 0.6, metalness: 0.6 });
+    addBox(2.0, 1.5, 1.2, 5, 0.75, -7, genMat);
+    // Exhaust pipe on top
+    addCylinder(0.12, 1.0, 5, 1.75, -7, metalMat);
+    // Control panel on side
+    addBox(0.6, 0.4, 0.05, 4, 1.2, -6.5, new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.5, metalness: 0.3 }));
+    // Fuel drum
+    addCylinder(0.3, 0.7, 3, 0.35, -9, new THREE.MeshStandardMaterial({ color: 0x883333, roughness: 0.7, metalness: 0.4 }));
+    // Oil stain on floor (dark disc)
+    const oilStain = new THREE.Mesh(
+      new THREE.CircleGeometry(0.5, 12),
+      new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 1.0 })
+    );
+    oilStain.rotation.x = -Math.PI / 2;
+    oilStain.position.set(5.5, 0.01, -8);
+    group.add(oilStain);
+
+    // === МАСТЕРСКАЯ (x[-16,-12] z[-17,-22]) — Workshop ===
+    // Workbench
+    addBox(2.5, 0.06, 0.8, -14, 0.85, -21.3, woodMat);
+    addBox(0.06, 0.85, 0.8, -15.2, 0.425, -21.3, woodMat);
+    addBox(0.06, 0.85, 0.8, -12.8, 0.425, -21.3, woodMat);
+    // Vice on bench
+    addBox(0.15, 0.2, 0.12, -14.5, 0.98, -21.2, metalMat);
+    // Chains hanging from ceiling
+    for (let i = 0; i < 3; i++) {
+      const chainLen = 0.8 + Math.random() * 0.6;
+      addCylinder(0.015, chainLen, -15 + i * 1.2, 3.5 - chainLen / 2, -19, metalMat, 4);
+    }
+    // Metal scraps on floor
+    addBox(0.4, 0.02, 0.15, -13.5, 0.01, -19, metalMat, 1.2);
+    addBox(0.3, 0.02, 0.12, -14.2, 0.01, -18.5, metalMat, -0.5);
+
+    // === НАСОСНАЯ (x[1.5,5.5] z[-15,-19]) — Pump room ===
+    // Pump unit
+    addCylinder(0.4, 0.8, 3.5, 0.4, -17, metalMat);
+    addBox(0.15, 0.6, 0.15, 3.5, 1.1, -17, metalMat);       // pipe up
+    // Valve wheels
+    const valveMat = new THREE.MeshStandardMaterial({ color: 0xaa3333, roughness: 0.5, metalness: 0.6 });
+    const valve = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 6, 12), valveMat);
+    valve.position.set(3.5, 1.5, -17);
+    group.add(valve);
+    // Puddle on floor
+    const puddle = new THREE.Mesh(
+      new THREE.CircleGeometry(0.6, 12),
+      new THREE.MeshStandardMaterial({ color: 0x152025, roughness: 0.3, metalness: 0.2 })
+    );
+    puddle.rotation.x = -Math.PI / 2;
+    puddle.position.set(4, 0.01, -16);
+    group.add(puddle);
+
+  } else if (deckIndex === 2) {
+    // === КАРЦЕР (x[-5.5,-1.5] z[-3,-9]) — Brig/cell ===
+    // Metal bench (bolted to wall)
+    addBox(1.5, 0.06, 0.4, -3.5, 0.4, -8.3, metalMat);
+    addBox(0.06, 0.4, 0.4, -4.2, 0.2, -8.3, metalMat);
+    addBox(0.06, 0.4, 0.4, -2.8, 0.2, -8.3, metalMat);
+    // Bucket in corner
+    addCylinder(0.15, 0.25, -5, 0.125, -8.3, metalMat, 8);
+    // Scratches/tally marks on wall (small thin planes)
+    const scratchMat = new THREE.MeshStandardMaterial({
+      color: 0x999999, roughness: 0.9, side: THREE.DoubleSide,
+    });
+    for (let i = 0; i < 7; i++) {
+      const scratch = new THREE.Mesh(new THREE.PlaneGeometry(0.02, 0.15), scratchMat);
+      scratch.position.set(-5.45, 1.2 + (i % 2) * 0.05, -5 + i * 0.08);
+      scratch.rotation.y = Math.PI / 2;
+      scratch.rotation.z = (Math.random() - 0.5) * 0.2;
+      group.add(scratch);
+    }
+    // Overturned stool
+    const stoolSeat = addBox(0.35, 0.04, 0.35, -3, 0.18, -5, woodMat);
+    stoolSeat.rotation.z = 1.2;
+    stoolSeat.rotation.y = 0.5;
+
+    // === ЗАПРЕЩЕНО room (x[17,24] z[-11,-20]) — Forbidden room ===
+    // Mysterious crate (large, sealed)
+    addBox(1.5, 1.2, 1.5, 20, 0.6, -15, new THREE.MeshStandardMaterial({ color: 0x3a3020, roughness: 0.85 }));
+    // Chains across the crate
+    addBox(1.8, 0.04, 0.04, 20, 1.25, -15, metalMat);
+    addBox(0.04, 0.04, 1.8, 20, 1.25, -15, metalMat);
+    // Old candles (melted stubs)
+    const candleMat = new THREE.MeshStandardMaterial({ color: 0xd4c8a0, roughness: 0.9 });
+    addCylinder(0.03, 0.08, 18.5, 0.04, -13, candleMat);
+    addCylinder(0.025, 0.06, 18.7, 0.03, -13.2, candleMat);
+    addCylinder(0.03, 0.1, 19, 0.05, -12.8, candleMat);
+    // Strange symbols on floor (dark circle)
+    const symbolMat = new THREE.MeshStandardMaterial({
+      color: 0x330000, roughness: 1.0, side: THREE.DoubleSide,
+      emissive: 0x220000, emissiveIntensity: 0.15,
+    });
+    const symbol = new THREE.Mesh(new THREE.RingGeometry(0.8, 1.0, 16), symbolMat);
+    symbol.rotation.x = -Math.PI / 2;
+    symbol.position.set(20, 0.01, -16.5);
+    group.add(symbol);
+    const innerSymbol = new THREE.Mesh(new THREE.CircleGeometry(0.3, 5), symbolMat);
+    innerSymbol.rotation.x = -Math.PI / 2;
+    innerSymbol.position.set(20, 0.015, -16.5);
+    group.add(innerSymbol);
+  }
+}
+
 // ==================== DECK DEFINITIONS ====================
 // Each space defines a rectangular area with openings on its walls.
 // Openings are {from, to} ranges in the wall's running axis coordinate.
@@ -230,7 +434,7 @@ const DECK_DEFS = [
     ],
     doors: [
       { x: -2, z: -6, wallAxis: 'z', sign: 'КАЮТА 1' },
-      { x: 2, z: -9, wallAxis: 'z', sign: 'КАЮТА 2' },
+      { x: 2, z: -9, wallAxis: 'z', sign: 'КАЮТА 2', signSide: -1 },
       { x: -2, z: -14, wallAxis: 'z', sign: 'СКЛАД' },
     ],
     notes: [
@@ -281,17 +485,17 @@ const DECK_DEFS = [
       },
     ],
     doors: [
-      { x: 1.5, z: -6, wallAxis: 'z', sign: 'ГЕНЕРАТОР' },
+      { x: 1.5, z: -6, wallAxis: 'z', sign: 'ГЕНЕРАТОР', signSide: -1 },
       { x: -12, z: -19, wallAxis: 'z', sign: 'МАСТЕРСКАЯ' },
-      { x: 1.5, z: -17, wallAxis: 'z', sign: 'НАСОСНАЯ' },
+      { x: 1.5, z: -17, wallAxis: 'z', sign: 'НАСОСНАЯ', signSide: -1 },
     ],
     notes: [
-      { pos: [4.5, 1.2, -7], text: 'Генератор работает на последнем. Топлива осталось на 72 часа. Если он встанет — останемся в полной темноте.\n\nGenerator running on fumes. 72 hours of fuel left. If it dies — total darkness.' },
+      { pos: [2.5, 1.2, -7], text: 'Генератор работает на последнем. Топлива осталось на 72 часа. Если он встанет — останемся в полной темноте.\n\nGenerator running on fumes. 72 hours of fuel left. If it dies — total darkness.' },
       { pos: [-14, 1.2, -20], text: 'Я нашёл это в трюме. Это не наше. Это было здесь до нас. Маркировка... 1943? Этот корабль гораздо старше, чем нам сказали.\n\nI found this in the hold. It\'s not ours. It was here before us. Markings... 1943? This ship is much older than they told us.' },
     ],
     items: [
       { pos: [-14, 0.5, -19], type: 'key', label: 'Rusty Key (ТРЮМ)' },
-      { pos: [3.5, 0.5, -17], type: 'battery', label: 'Battery Pack' },
+      { pos: [4.8, 0.5, -16], type: 'battery', label: 'Battery Pack' },
     ],
     scares: [
       { pos: [-10.5, 0, -25], type: 'figure' },
@@ -327,7 +531,7 @@ const DECK_DEFS = [
     ],
     doors: [
       { x: -1.5, z: -5.5, wallAxis: 'z', sign: 'КАРЦЕР' },
-      { x: 17, z: -14, wallAxis: 'z', sign: 'ЗАПРЕЩЕНО', locked: true },
+      { x: 17, z: -14, wallAxis: 'z', sign: 'ЗАПРЕЩЕНО', locked: true, signSide: -1 },
     ],
     notes: [
       { pos: [-3.5, 1.2, -6], text: 'Если кто-то это найдёт — не спускайтесь ниже. Мы открыли то, что должно было остаться закрытым. Оно поднимается по палубам. Оно живое.\n\nIf anyone finds this — don\'t go deeper. We opened what should have stayed sealed. It\'s rising through the decks. It\'s alive.' },
@@ -405,6 +609,9 @@ export class ShipWorld {
       // Place stairs
       if (deck.stairs) this.placeStairs(group, deck.stairs, i);
 
+      // Add room furnishings
+      addFurnishings(group, i);
+
       // Add some dim emergency lights in corridors
       deck.spaces.slice(0, 3).forEach(space => {
         const lx = (space.x1 + space.x2) / 2;
@@ -423,7 +630,7 @@ export class ShipWorld {
   }
 
   placeDoor(group, config, deckIndex, h) {
-    const { x, z, wallAxis, sign, locked } = config;
+    const { x, z, wallAxis, sign, locked, signSide } = config;
     const doorMat = new THREE.MeshStandardMaterial({
       color: 0x887766, roughness: 0.75, metalness: 0.4,
     });
@@ -454,6 +661,10 @@ export class ShipWorld {
     doorMesh.userData.pivot = pivot;
     doorMesh.userData.closedRotation = 0;
     doorMesh.userData.openedRotation = Math.PI / 2;
+    doorMesh.userData.wallAxis = wallAxis;
+    doorMesh.userData.doorX = x;
+    doorMesh.userData.doorZ = z;
+    doorMesh.userData.doorW = doorW;
     this.doors.push(doorMesh);
 
     if (sign) {
@@ -462,12 +673,14 @@ export class ShipWorld {
         new THREE.PlaneGeometry(1.0, 0.3),
         new THREE.MeshStandardMaterial({ map: signTex, emissive: 0x220000, emissiveIntensity: 0.3 })
       );
-      // Offset sign slightly from wall to prevent z-fighting
+      // Offset sign toward corridor side to prevent z-fighting
+      const side = signSide || 1;
       if (wallAxis === 'z') {
-        signMesh.position.set(x + 0.05, 2.7, z);
-        signMesh.rotation.y = Math.PI / 2;
+        signMesh.position.set(x + 0.05 * side, 2.7, z);
+        signMesh.rotation.y = side > 0 ? Math.PI / 2 : -Math.PI / 2;
       } else {
-        signMesh.position.set(x, 2.7, z + 0.05);
+        signMesh.position.set(x, 2.7, z + 0.05 * side);
+        if (side < 0) signMesh.rotation.y = Math.PI;
       }
       group.add(signMesh);
     }
@@ -610,7 +823,25 @@ export class ShipWorld {
   }
 
   getColliders() {
-    return this.deckColliders[this.currentDeck] || [];
+    const walls = this.deckColliders[this.currentDeck] || [];
+    const doorColliders = [];
+    for (const door of this.doors) {
+      if (door.userData.deckIndex !== this.currentDeck) continue;
+      if (door.userData.isOpen) continue;
+      const { wallAxis, doorX, doorZ, doorW } = door.userData;
+      if (wallAxis === 'z') {
+        doorColliders.push(new THREE.Box3().setFromCenterAndSize(
+          new THREE.Vector3(doorX, 1.2, doorZ),
+          new THREE.Vector3(0.3, 2.4, doorW)
+        ));
+      } else {
+        doorColliders.push(new THREE.Box3().setFromCenterAndSize(
+          new THREE.Vector3(doorX, 1.2, doorZ),
+          new THREE.Vector3(doorW, 2.4, 0.3)
+        ));
+      }
+    }
+    return [...walls, ...doorColliders];
   }
 
   getSpawnPoint() {

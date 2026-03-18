@@ -69,6 +69,9 @@ export class AudioManager {
 
     // Distant breathing (sinusoidal volume modulation)
     this.startBreathing();
+
+    // Ghostly whisper voices
+    this.scheduleWhispers();
   }
 
   scheduleCreaks() {
@@ -153,6 +156,128 @@ export class AudioManager {
       setTimeout(breathe, 5000 + Math.random() * 10000);
     };
     setTimeout(breathe, 8000);
+  }
+
+  scheduleWhispers() {
+    // Vowel formant frequencies — these are what make noise sound "voice-like"
+    const formants = [
+      [270, 2300],  // "a" vowel
+      [390, 1990],  // "e" vowel
+      [530, 1850],  // "o" vowel
+      [660, 1720],  // "u" vowel
+    ];
+
+    // Intensity scales with deck depth (set externally via setDeckDepth)
+    this.whisperIntensity = 1.0;
+
+    const whisper = () => {
+      if (!this.initialized) return;
+      const now = this.ctx.currentTime;
+      const intensity = this.whisperIntensity;
+
+      // Pick a random vowel formant pair
+      const [f1, f2] = formants[Math.floor(Math.random() * formants.length)];
+
+      // Duration of this whisper "phrase" — 1.5 to 3.5 seconds
+      const duration = 1.5 + Math.random() * 2.0;
+
+      // Noise source — pink noise sounds most voice-like
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.createNoiseBuffer(duration + 0.5, 'pink');
+
+      // Two formant bandpass filters in parallel, mixed together
+      const f1Filter = this.ctx.createBiquadFilter();
+      f1Filter.type = 'bandpass';
+      f1Filter.frequency.value = f1 + (Math.random() - 0.5) * 80;
+      f1Filter.Q.value = 8 + Math.random() * 6;
+
+      const f2Filter = this.ctx.createBiquadFilter();
+      f2Filter.type = 'bandpass';
+      f2Filter.frequency.value = f2 + (Math.random() - 0.5) * 200;
+      f2Filter.Q.value = 6 + Math.random() * 4;
+
+      // Gain nodes for each formant
+      const f1Gain = this.ctx.createGain();
+      f1Gain.gain.value = 0.7;
+      const f2Gain = this.ctx.createGain();
+      f2Gain.gain.value = 0.3;
+
+      // Volume scales with deck depth — clearly audible
+      const peakVol = (0.06 + Math.random() * 0.03) * intensity;
+      const masterGain = this.ctx.createGain();
+      masterGain.gain.setValueAtTime(0, now);
+      masterGain.gain.linearRampToValueAtTime(peakVol, now + 0.4);
+      masterGain.gain.setValueAtTime(peakVol * 0.8, now + duration - 0.6);
+      masterGain.gain.linearRampToValueAtTime(0, now + duration);
+
+      // Low-pass to make it sound muffled/behind walls
+      const muffle = this.ctx.createBiquadFilter();
+      muffle.type = 'lowpass';
+      muffle.frequency.value = 1200 + Math.random() * 600;
+
+      // Connect formant filters in parallel
+      noiseSource.connect(f1Filter);
+      noiseSource.connect(f2Filter);
+      f1Filter.connect(f1Gain);
+      f2Filter.connect(f2Gain);
+      f1Gain.connect(muffle);
+      f2Gain.connect(muffle);
+      muffle.connect(masterGain);
+      masterGain.connect(this.masterGain);
+
+      noiseSource.start(now);
+      noiseSource.stop(now + duration);
+
+      // Second overlapping voice for a "conversation behind the wall" feel
+      if (Math.random() < 0.4) {
+        setTimeout(() => {
+          if (!this.initialized) return;
+          this.playWhisperFragment();
+        }, (duration * 0.4 + Math.random() * 0.6) * 1000);
+      }
+
+      // Interval shortens on deeper decks — more voices below
+      const baseInterval = 8000 + Math.random() * 15000;
+      const interval = baseInterval / intensity;
+      setTimeout(whisper, interval);
+    };
+    // First whisper comes quickly so the player notices it
+    setTimeout(whisper, 5000 + Math.random() * 3000);
+  }
+
+  setDeckDepth(deckIndex) {
+    // Deck 0 = 1.0x, Deck 1 = 1.5x, Deck 2 = 2.0x
+    this.whisperIntensity = 1.0 + deckIndex * 0.5;
+  }
+
+  playWhisperFragment() {
+    const now = this.ctx.currentTime;
+    const duration = 0.6 + Math.random() * 1.2;
+    const intensity = this.whisperIntensity || 1.0;
+    const noiseSource = this.ctx.createBufferSource();
+    noiseSource.buffer = this.createNoiseBuffer(duration + 0.3, 'pink');
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 300 + Math.random() * 400;
+    filter.Q.value = 10;
+
+    const muffle = this.ctx.createBiquadFilter();
+    muffle.type = 'lowpass';
+    muffle.frequency.value = 1200;
+
+    const peakVol = (0.04 + Math.random() * 0.02) * intensity;
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(peakVol, now + 0.15);
+    gain.gain.linearRampToValueAtTime(0, now + duration);
+
+    noiseSource.connect(filter);
+    filter.connect(muffle);
+    muffle.connect(gain);
+    gain.connect(this.masterGain);
+    noiseSource.start(now);
+    noiseSource.stop(now + duration);
   }
 
   playFootstep() {
