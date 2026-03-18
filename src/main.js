@@ -43,19 +43,19 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 renderer.shadowMap.enabled = !isMobile;
 if (!isMobile) renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.5;
+renderer.toneMappingExposure = 1.2;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
-scene.fog = new THREE.FogExp2(0x000000, 0.12);
+scene.fog = new THREE.FogExp2(0x000000, 0.06);
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 50);
 camera.position.set(0, 1.6, -2);
 
 // ==================== FLASHLIGHT ====================
-const flashlight = new THREE.SpotLight(0xfff5e0, 8, 20, Math.PI / 6, 0.5, 1.5);
+const flashlight = new THREE.SpotLight(0xfff5e0, 30, 30, Math.PI / 5, 0.4, 1);
 if (!isMobile) {
   flashlight.castShadow = true;
   flashlight.shadow.mapSize.set(512, 512);
@@ -65,7 +65,7 @@ flashlight.position.set(0.3, -0.2, 0);
 flashlight.target.position.set(0, 0, -1);
 camera.add(flashlight.target);
 
-const playerAmbient = new THREE.PointLight(0x111122, 0.05, 3);
+const playerAmbient = new THREE.PointLight(0x223344, 0.4, 5);
 camera.add(playerAmbient);
 scene.add(camera);
 
@@ -370,8 +370,8 @@ function descendDeck(toLevel) {
     const layout = world.getDeckLayout();
     depthIndicator.textContent = layout.name;
 
-    scene.fog.density = 0.12 + toLevel * 0.04;
-    renderer.toneMappingExposure = 0.5 - toLevel * 0.1;
+    scene.fog.density = 0.06 + toLevel * 0.02;
+    renderer.toneMappingExposure = 1.2 - toLevel * 0.15;
 
     setTimeout(() => {
       jumpScareOverlay.style.display = 'none';
@@ -550,7 +550,26 @@ function animate() {
 
   if (state.direction.length() > 0) {
     state.direction.normalize();
-    camera.position.addScaledVector(state.direction, state.moveSpeed * delta);
+    const move = state.direction.clone().multiplyScalar(state.moveSpeed * delta);
+    const newPos = camera.position.clone().add(move);
+    newPos.y = 1.6;
+
+    // Wall collision check
+    const playerRadius = 0.3;
+    const playerBox = new THREE.Box3().setFromCenterAndSize(
+      newPos,
+      new THREE.Vector3(playerRadius * 2, 1.6, playerRadius * 2)
+    );
+    let blocked = false;
+    for (const collider of world.colliders) {
+      if (playerBox.intersectsBox(collider)) {
+        blocked = true;
+        break;
+      }
+    }
+    if (!blocked) {
+      camera.position.copy(newPos);
+    }
 
     state.footstepTimer += delta;
     if (state.footstepTimer >= state.footstepInterval) {
@@ -564,7 +583,7 @@ function animate() {
   // Flashlight
   if (state.flashlightOn && state.battery > 0) {
     state.battery -= state.batteryDrain * delta;
-    flashlight.intensity = 8 * (state.battery / 100);
+    flashlight.intensity = 30 * (state.battery / 100);
     flashlight.visible = true;
     if (state.battery < 20) {
       flashlight.intensity *= 0.5 + Math.random() * 0.5;

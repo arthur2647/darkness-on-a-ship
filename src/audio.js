@@ -157,7 +157,6 @@ export class AudioManager {
 
   playFootstep() {
     if (!this.initialized) return;
-    const osc = this.ctx.createOscillator();
     const noise = this.ctx.createBufferSource();
     noise.buffer = this.createNoiseBuffer(0.15, 'brown');
     const gain = this.ctx.createGain();
@@ -178,12 +177,12 @@ export class AudioManager {
 
   playDoorOpen() {
     if (!this.initialized) return;
-    const osc = this.ctx.createOscillator();
+    const doorOsc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(60, this.ctx.currentTime);
-    osc.frequency.linearRampToValueAtTime(30, this.ctx.currentTime + 1.5);
+    doorOsc.type = 'sawtooth';
+    doorOsc.frequency.setValueAtTime(60, this.ctx.currentTime);
+    doorOsc.frequency.linearRampToValueAtTime(30, this.ctx.currentTime + 1.5);
 
     gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.5);
@@ -193,11 +192,11 @@ export class AudioManager {
     filter.frequency.value = 200;
     filter.Q.value = 3;
 
-    osc.connect(filter);
+    doorOsc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 1.5);
+    doorOsc.start();
+    doorOsc.stop(this.ctx.currentTime + 1.5);
   }
 
   playJumpScare() {

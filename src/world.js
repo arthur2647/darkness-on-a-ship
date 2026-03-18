@@ -156,7 +156,7 @@ const DECK_LAYOUTS = [
       { pos: [10, 0, -28], type: 'shadow', triggered: false },
     ],
     stairs: { pos: [10, 0, -35], toLevel: 1 },
-    light: { color: 0x331100, intensity: 0.02 },
+    light: { color: 0x443322, intensity: 0.15 },
   },
   // DECK 2 - Engine area (darker, more damp)
   {
@@ -184,7 +184,7 @@ const DECK_LAYOUTS = [
       { pos: [0, 0, -20], type: 'bang', triggered: false },
     ],
     stairs: { pos: [-12, 0, -30], toLevel: 2 },
-    light: { color: 0x220800, intensity: 0.01 },
+    light: { color: 0x332211, intensity: 0.08 },
   },
   // DECK 3 - The Hold (deepest, scariest — escape is here)
   {
@@ -208,7 +208,7 @@ const DECK_LAYOUTS = [
       { pos: [-3, 0, -6], type: 'whisper', triggered: false },
     ],
     stairs: null,
-    light: { color: 0x110400, intensity: 0.005 },
+    light: { color: 0x221100, intensity: 0.04 },
   },
 ];
 
@@ -224,8 +224,6 @@ export class ShipWorld {
     this.floorTex = createFloorTexture();
     this.wallTex.repeat.set(2, 1);
     this.floorTex.repeat.set(4, 4);
-    this.inventory = { keys: [], batteries: 0 };
-
     this.buildAllDecks();
     this.showDeck(0);
   }
@@ -271,21 +269,21 @@ export class ShipWorld {
 
     const wallMat = new THREE.MeshStandardMaterial({
       map: this.wallTex.clone(),
-      roughness: 0.9,
-      metalness: 0.3,
-      color: 0x333333,
+      roughness: 0.85,
+      metalness: 0.2,
+      color: 0x888888,
     });
 
     const floorMat = new THREE.MeshStandardMaterial({
       map: this.floorTex.clone(),
-      roughness: 0.95,
-      metalness: 0.2,
-      color: 0x222222,
+      roughness: 0.9,
+      metalness: 0.15,
+      color: 0x666666,
     });
 
     const ceilingMat = new THREE.MeshStandardMaterial({
-      color: 0x1a1a1a,
-      roughness: 1,
+      color: 0x555555,
+      roughness: 0.95,
       metalness: 0.1,
     });
 
@@ -343,7 +341,7 @@ export class ShipWorld {
 
   addPipes(group, x, y, z, length, dir) {
     const pipeMat = new THREE.MeshStandardMaterial({
-      color: 0x3a3a2a,
+      color: 0x6a6a5a,
       roughness: 0.7,
       metalness: 0.5,
     });
@@ -370,15 +368,15 @@ export class ShipWorld {
 
     const wallMat = new THREE.MeshStandardMaterial({
       map: this.wallTex.clone(),
-      roughness: 0.9,
-      metalness: 0.3,
-      color: 0x2a2a2a,
+      roughness: 0.85,
+      metalness: 0.2,
+      color: 0x777777,
     });
 
     const floorMat = new THREE.MeshStandardMaterial({
       map: this.floorTex.clone(),
-      roughness: 0.95,
-      color: 0x1a1a1a,
+      roughness: 0.9,
+      color: 0x555555,
     });
 
     // Floor
@@ -389,7 +387,7 @@ export class ShipWorld {
 
     // Ceiling
     const ceil = new THREE.Mesh(new THREE.PlaneGeometry(w, d),
-      new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 1 }));
+      new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.95 }));
     ceil.rotation.x = Math.PI / 2;
     ceil.position.set(rx - w / 2, ry + h, rz - d / 2);
     group.add(ceil);
@@ -413,8 +411,8 @@ export class ShipWorld {
     if (room.door) {
       const [dx, dy, dz] = room.door;
       const doorMat = new THREE.MeshStandardMaterial({
-        color: 0x444433,
-        roughness: 0.8,
+        color: 0x887766,
+        roughness: 0.75,
         metalness: 0.4,
       });
       const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.4, 0.1), doorMat);
@@ -500,12 +498,6 @@ export class ShipWorld {
   }
 
   addStairs(group, stairs, deckIndex) {
-    const stairMat = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      roughness: 0.8,
-      metalness: 0.5,
-    });
-
     // Stairwell opening - glowing indicator
     const marker = new THREE.Mesh(
       new THREE.BoxGeometry(2, 0.05, 2),
