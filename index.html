@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Темница — Darkness on the Ship</title>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -12,13 +12,18 @@
       <h1>ТЕМНИЦА</h1>
       <h2>Darkness on the Ship</h2>
       <p class="subtitle">You wake in the dark. The ship groans around you.<br>Find your way out... if you can.</p>
-      <div id="start-btn">CLICK TO BEGIN</div>
-      <div class="controls-hint">
+      <div id="start-btn">TAP TO BEGIN</div>
+      <div class="controls-hint controls-hint-desktop">
         <span>WASD — Move</span>
         <span>MOUSE — Look</span>
         <span>F — Flashlight</span>
         <span>E — Interact</span>
         <span>ESC — Pause</span>
+      </div>
+      <div class="controls-hint controls-hint-mobile">
+        <span>Left thumb — Move</span>
+        <span>Right thumb — Look</span>
+        <span>Buttons — Actions</span>
       </div>
     </div>
   </div>
@@ -32,9 +37,22 @@
     <div id="interaction-prompt" style="display:none;"></div>
     <div id="note-overlay" style="display:none;">
       <div id="note-content"></div>
-      <div id="note-close">Press E to close</div>
+      <div id="note-close">Tap or press E to close</div>
     </div>
     <div id="crosshair">+</div>
+
+    <!-- Mobile touch controls -->
+    <div id="mobile-controls">
+      <div id="joystick-zone">
+        <div id="joystick-base">
+          <div id="joystick-thumb"></div>
+        </div>
+      </div>
+      <div id="mobile-buttons">
+        <button id="btn-interact" class="mobile-btn">E</button>
+        <button id="btn-flashlight" class="mobile-btn">F</button>
+      </div>
+    </div>
   </div>
 
   <div id="jump-scare-overlay" style="display:none;"></div>
